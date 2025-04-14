@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.send("Welcome to the poke-battle api")
 } )
 
-
+app.use('/api/leaderboard', leaderboardRoutes)
 
 
 
