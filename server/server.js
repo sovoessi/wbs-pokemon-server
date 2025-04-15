@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 // import connectDB from "./config/db.js";
 import pokemonRoutes from "./routes/pokemonRoutes.js";
+import authRoutes from './routes/authRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/", pokemonRoutes);
 app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/auth', authRoutes);
 
 
 app.get("/", (req, res) => {
