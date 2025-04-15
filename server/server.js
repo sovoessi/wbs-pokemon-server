@@ -1,29 +1,28 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
-import connectDB from './config/db.js'
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+// import connectDB from "./config/db.js";
+import pokemonRoutes from "./routes/pokemonRoutes.js";
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 
-connectDB();
+// connectDB();
 
 const app = express();
-dotenv.config()
-app.use(cors())
+dotenv.config();
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-app.get('/', (req, res) => {
-    res.send("Welcome to the poke-battle api")
-} )
-
+app.use("/", pokemonRoutes);
 app.use('/api/leaderboard', leaderboardRoutes)
 
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the poke-battle api");
+});
 
 app.listen(PORT, () => {
-    console.log(`Server 🏃 on port ${PORT}`);
-    
-})
+  console.log(`Server 🏃 on port ${PORT}`);
+});
