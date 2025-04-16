@@ -1,13 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-// import connectDB from "./config/db.js";
+import connectDB from "./config/db.js";
 import pokemonRoutes from "./routes/pokemonRoutes.js";
+import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import authRoutes from './routes/authRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 
-// connectDB();
+connectDB();
 
 const app = express();
 dotenv.config();

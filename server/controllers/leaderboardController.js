@@ -1,5 +1,5 @@
-import Leaderboard from "../models/Leaderboard";
-import User from "../models/User";
+import Leaderboard from "../models/Leaderboard.js";
+import User from "../models/User.js";
 
 
 export const getLeaderboard = async (req, res) => {
