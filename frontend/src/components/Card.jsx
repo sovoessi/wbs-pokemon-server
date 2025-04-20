@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaRegBookmark, FaRegHeart, FaArrowRight } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -7,11 +7,7 @@ function Card() {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(true);
   const APIURL = import.meta.env.VITE_API_URL;
-  const [isCaught, setIsCaught] = useState(false);
-
-  const handleCatch = () => {
-    setIsCaught(!isCaught);
-  };
+  const [caughtPokemons, setCaughtPokemons] = useState([]);
 
   useEffect(() => {
     const fetchPokemons = async () => {
@@ -27,6 +23,45 @@ function Card() {
     fetchPokemons();
   }, [APIURL]);
 
+  const handleCatch = (name) => {
+    console.log("Catching Pokémon with name:", name);
+
+    if (caughtPokemons.includes(name)) {
+      console.log(`Releasing ${name}...`);
+      const updatedCaughtPokemons = caughtPokemons.filter(
+        (pokemon) => pokemon !== name
+      );
+      setCaughtPokemons(updatedCaughtPokemons);
+
+      localStorage.setItem(
+        "caughtPokemons",
+        JSON.stringify(updatedCaughtPokemons)
+      );
+
+      alert(`${name} has been released!`);
+    } else {
+      const caughtPokemon = pokemons.find((pokemon) => pokemon.name === name);
+      console.log(caughtPokemon);
+
+      if (caughtPokemon) {
+        console.log(`Caught ${caughtPokemon.name}!`);
+        const updatedCaughtPokemons = [...caughtPokemons, name];
+        setCaughtPokemons(updatedCaughtPokemons);
+
+        localStorage.setItem(
+          "caughtPokemons",
+          JSON.stringify(updatedCaughtPokemons)
+        );
+
+        if (updatedCaughtPokemons.length === 10) {
+          alert("10 Pokémon caught! You can now battle!");
+        }
+      } else {
+        console.log("No Pokémon caught.");
+      }
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
 
   return (
@@ -39,14 +74,17 @@ function Card() {
           <div className="flex justify-between place-items-center w-full mb-4 ">
             <div>
               <img
-                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" // Pokémon ball image URL
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
                 alt="Pokémon Ball"
-                onClick={handleCatch}
+                onClick={() => handleCatch(pokemon.name)}
                 className={`w-12 h-12 cursor-pointer rounded-full transition-all ease-in-out duration-300 ${
-                  isCaught ? "bg-red-500" : "bg-gray-200"
+                  caughtPokemons.includes(pokemon.name)
+                    ? "bg-red-500"
+                    : "bg-gray-200"
                 }`}
               />
-              {isCaught && (
+
+              {caughtPokemons.includes(pokemon.name) && (
                 <p className="mt-2 text-lg font-semibold text-red-500">
                   Pokémon Caught!
                 </p>
