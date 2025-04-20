@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getRandomPokemons, userWins } from "../utils/gameplay";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Updated import
 
 const BattlePage = () => {
 	const [userPokemons, setUserPokemons] = useState([getRandomPokemons()]);
@@ -9,6 +10,8 @@ const BattlePage = () => {
 	]);
 	const [userScore, setUserScore] = useState(0);
 	const [opponentScore, setOpponentScore] = useState(0);
+
+	const navigate = useNavigate(); // Initialize navigate
 
 	const fetchUserPokemons = async () => {
 		const pokemons = await getRandomPokemons();
@@ -39,24 +42,18 @@ const BattlePage = () => {
 	};
 
 	const saveScore = async () => {
-		console.log("Score saved:", { userScore, opponentScore });
-		// Add logic to save the score, e.g., send it to a server or store it locally
 		// take user id from token
 		const token = localStorage.getItem("token");
 		const userId = token.split(".")[1];
 		const decodedToken = JSON.parse(atob(userId));
 		const userIdFromToken = decodedToken.id;
-		console.log(userIdFromToken);
 		// save score to database
 		try {
-			const res = await axios.post(
-				`${import.meta.env.VITE_API_URL}api/leaderboard`,
-				{
-					userId: userIdFromToken,
-					score: userScore,
-				}
-			);
-			console.log(res.data);
+			await axios.post(`${import.meta.env.VITE_API_URL}api/leaderboard`, {
+				userId: userIdFromToken,
+				score: userScore,
+			});
+			navigate("/");
 		} catch (error) {
 			console.error("Error saving score:", error);
 		}
@@ -75,60 +72,79 @@ const BattlePage = () => {
 
 	return (
 		<>
-			<h1 className='text-3xl font-bold underline'>Battle</h1>
-			<div className='flex justify-between m-2'>
-				<div className='w-1/2'>
-					<h2>My Pokemons</h2>
+			<h1 className='text-3xl font-bold underline text-center mb-6'>Battle</h1>
+			<div className='grid grid-cols-3 gap-4 m-4'>
+				{/* User Pokémons */}
+				<div className='bg-white p-4 rounded-lg shadow-md'>
+					<h2 className='text-xl font-bold mb-4 text-center'>My Pokémons</h2>
 					{userPokemons.map((pokemon, index) => (
-						<div key={index}>
-							<p>{pokemon.name}</p>
+						<div
+							key={index}
+							className='mb-6'
+						>
+							<p className='font-semibold'>{pokemon.name}</p>
 							<p>Type: {pokemon.type}</p>
 							<p>Power: {pokemon.power}</p>
 							<img
 								src={pokemon.image}
 								alt={pokemon.name}
-								className='w-full h-80 object-cover mt-5 rounded-lg shadow-md'
+								className='w-full h-40 object-cover mt-3 rounded-lg shadow-md'
 							/>
 						</div>
 					))}
-					{userScore ? <h2>User Score: {userScore}</h2> : ""}
-					{userScore ? "" : <h2>Click Fight to see your score</h2>}
 				</div>
-				<div className='w-1/2'>
-					<h2>Computer</h2>
+
+				{/* Battle Actions */}
+				<div className='bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center justify-center'>
+					<h2 className='text-xl font-bold mb-4 text-center'>Battle Actions</h2>
+					{userScore || opponentScore ? (
+						<div className='mb-4'>
+							<h2 className='text-lg font-bold text-green-600'>
+								User Score: {userScore}
+							</h2>
+							<h2 className='text-lg font-bold text-red-600'>
+								Opponent Score: {opponentScore}
+							</h2>
+						</div>
+					) : null}
+					<button
+						onClick={fightMode}
+						className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4'
+					>
+						Fight
+					</button>
+					{userScore ? (
+						<button
+							onClick={saveScore}
+							className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded'
+						>
+							Save Score
+						</button>
+					) : null}
+				</div>
+
+				{/* Opponent Pokémons */}
+				<div className='bg-white p-4 rounded-lg shadow-md'>
+					<h2 className='text-xl font-bold mb-4 text-center'>
+						Opponent Pokemons
+					</h2>
 					{opponentPokemons.map((pokemon, index) => (
-						<div key={index}>
-							<p>{pokemon.name}</p>
+						<div
+							key={index}
+							className='mb-6'
+						>
+							<p className='font-semibold'>{pokemon.name}</p>
 							<p>Type: {pokemon.type}</p>
 							<p>Power: {pokemon.power}</p>
 							<img
 								src={pokemon.image}
 								alt={pokemon.name}
-								className='w-full h-80 object-cover mt-5 rounded-lg shadow-md'
+								className='w-full h-40 object-cover mt-3 rounded-lg shadow-md'
 							/>
 						</div>
 					))}
 				</div>
 			</div>
-
-			{opponentScore ? <h2>Opponent Score: {opponentScore}</h2> : ""}
-
-			{userScore ? (
-				<button
-					onClick={saveScore}
-					className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded'
-				>
-					Save Score
-				</button>
-			) : (
-				""
-			)}
-			<button
-				onClick={fightMode}
-				className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-			>
-				Fight
-			</button>
 		</>
 	);
 };
