@@ -4,7 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Updated import
 
 const BattlePage = () => {
-	const [userPokemons, setUserPokemons] = useState([getRandomPokemons()]);
+	const [userPokemons, setUserPokemons] = useState([localStorage.getItem("caughtPokemons") || []]);
 	const [opponentPokemons, setOpponentPokemons] = useState([
 		getRandomPokemons(),
 	]);
@@ -13,10 +13,21 @@ const BattlePage = () => {
 
 	const navigate = useNavigate(); // Initialize navigate
 
-	const fetchUserPokemons = async () => {
-		const pokemons = await getRandomPokemons();
-		setUserPokemons(pokemons);
-	};
+	const fetchUserPokemons = () => {
+		const caughtPokemons = JSON.parse(localStorage.getItem("caughtPokemons"));
+		if (caughtPokemons) {
+			setUserPokemons(caughtPokemons);
+		} else {
+			alert("No caught pokemons found. Please catch some pokemons first.");
+			navigate("/card"); // Redirect to the card page if no caught pokemons
+		}
+	}
+
+	useEffect (() => {
+		fetchUserPokemons();
+		fetchOpponentPokemons();
+	}, [navigate]);
+
 	const fetchOpponentPokemons = async () => {
 		const pokemons = await getRandomPokemons();
 		setOpponentPokemons(pokemons);
@@ -37,8 +48,8 @@ const BattlePage = () => {
 			}
 		});
 		// reset userPokemons and opponentPokemons
-		fetchUserPokemons();
 		fetchOpponentPokemons();
+		fetchUserPokemons();
 	};
 
 	const saveScore = async () => {
@@ -60,15 +71,10 @@ const BattlePage = () => {
 		// reset scores
 		setUserScore(0);
 		setOpponentScore(0);
-		fetchUserPokemons();
 		fetchOpponentPokemons();
+		fetchUserPokemons();
 	};
 
-	// fetch user and opponent pokemons when component mounts
-	useEffect(() => {
-		fetchUserPokemons();
-		fetchOpponentPokemons();
-	}, []);
 
 	return (
 		<>

@@ -7,7 +7,7 @@ function Card() {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(true);
   const APIURL = import.meta.env.VITE_API_URL;
-  const [caughtPokemons, setCaughtPokemons] = useState([]);
+  const [caughtPokemons, setCaughtPokemons] = useState([localStorage.getItem("caughtPokemons") || []]);
 
   useEffect(() => {
     const fetchPokemons = async () => {
@@ -23,44 +23,45 @@ function Card() {
     fetchPokemons();
   }, [APIURL]);
 
-  const handleCatch = (name) => {
-    console.log("Catching Pokémon with name:", name);
+ const handleCatch = (pokemon) => {
+    // Get the current caughtPokemons from localStorage
+    if(!caughtPokemons) {
+			// If caughtPokemons is null, initialize it as an empty array
+      localStorage.setItem("caughtPokemons", JSON.stringify([pokemon]));
+      setCaughtPokemons([pokemon]);
+      return;
+		}
 
-    if (caughtPokemons.includes(name)) {
-      console.log(`Releasing ${name}...`);
-      const updatedCaughtPokemons = caughtPokemons.filter(
-        (pokemon) => pokemon !== name
-      );
-      setCaughtPokemons(updatedCaughtPokemons);
+		// Check if the Pokémon is already caught
+		const isCaught = caughtPokemons.some(
+			(caughtPokemon) => caughtPokemon.name === pokemon.name
+		);
 
-      localStorage.setItem(
-        "caughtPokemons",
-        JSON.stringify(updatedCaughtPokemons)
-      );
+		let updatedCaughtPokemons;
 
-      alert(`${name} has been released!`);
-    } else {
-      const caughtPokemon = pokemons.find((pokemon) => pokemon.name === name);
-      console.log(caughtPokemon);
+		if (isCaught) {
+			// If the Pokémon is already caught, remove it (release it)
+			updatedCaughtPokemons = caughtPokemons.filter(
+				(caughtPokemon) => caughtPokemon.name !== pokemon.name
+			);
+		} else {
+			// If the Pokémon is not caught, add it to the list
+			if (caughtPokemons.length === 10) {
+				alert("10 Pokémon caught! You can now battle!");
+				return;
+			}
+			updatedCaughtPokemons = [...caughtPokemons, pokemon];
+		}
 
-      if (caughtPokemon) {
-        console.log(`Caught ${caughtPokemon.name}!`);
-        const updatedCaughtPokemons = [...caughtPokemons, name];
-        setCaughtPokemons(updatedCaughtPokemons);
+		// Update localStorage
+		localStorage.setItem(
+			"caughtPokemons",
+			JSON.stringify(updatedCaughtPokemons)
+		);
 
-        localStorage.setItem(
-          "caughtPokemons",
-          JSON.stringify(updatedCaughtPokemons)
-        );
-
-        if (updatedCaughtPokemons.length === 10) {
-          alert("10 Pokémon caught! You can now battle!");
-        }
-      } else {
-        console.log("No Pokémon caught.");
-      }
-    }
-  };
+		// Update state
+		setCaughtPokemons(updatedCaughtPokemons);
+ };
 
   if (loading) return <p>Loading...</p>;
 
@@ -76,7 +77,7 @@ function Card() {
               <img
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
                 alt="Pokémon Ball"
-                onClick={() => handleCatch(pokemon.name)}
+                onClick={() => handleCatch(pokemon)}
                 className={`w-12 h-12 cursor-pointer rounded-full transition-all ease-in-out duration-300 ${
                   caughtPokemons.includes(pokemon.name)
                     ? "bg-red-500"
