@@ -34,7 +34,7 @@ const Nav = () => {
         </div>
         {token ? (
           <>
-          <div className="hidden navbar-center lg:flex">
+          <div className="navbar-center lg:flex">
             <ul className="px-1 menu menu-horizontal">
               <li>
                 <NavLink to="/battle" className={activeLink}>
@@ -44,7 +44,7 @@ const Nav = () => {
               </li>
             </ul>
           </div>
-          <div className="hidden navbar-center lg:flex">
+          <div className="navbar-center lg:flex">
             <ul className="px-1 menu menu-horizontal">
               <li>
                 <NavLink to="/card" className={activeLink}>

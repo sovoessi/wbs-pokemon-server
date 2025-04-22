@@ -13,7 +13,6 @@ function Home() {
       setLoading(true);
       try{
         const response = await axios.get(`${APIURL}api/leaderboard`);
-        console.log(response.data);
         setResults(response.data);
         setLoading(false);
         }catch (error) {
@@ -28,7 +27,7 @@ function Home() {
   return (
 		<>
 			<h1 className='text-3xl font-bold underline text-center mb-6'>
-				Leaderboard
+				Top Scores
 			</h1>
 			{loading ? (
 				<p className='text-center text-gray-500'>Loading...</p>
