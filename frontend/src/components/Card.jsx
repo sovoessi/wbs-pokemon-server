@@ -25,8 +25,8 @@ function Card() {
 
  const handleCatch = (pokemon) => {
     // Get the current caughtPokemons from localStorage
-    if(!caughtPokemons) {
-			// If caughtPokemons is null, initialize it as an empty array
+    if(!caughtPokemons || caughtPokemons === "[]"){
+      // If caughtPokemons is null or empty, initialize it as an empty array{
       localStorage.setItem("caughtPokemons", JSON.stringify([pokemon]));
       setCaughtPokemons([pokemon]);
       return;

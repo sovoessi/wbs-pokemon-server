@@ -14,8 +14,8 @@ const BattlePage = () => {
 	const navigate = useNavigate(); // Initialize navigate
 
 	const fetchUserPokemons = () => {
-		const caughtPokemons = JSON.parse(localStorage.getItem("caughtPokemons"));
-		if (caughtPokemons) {
+		const caughtPokemons = JSON.parse(localStorage.getItem("caughtPokemons") || "[]");
+		if (caughtPokemons && caughtPokemons.length > 0) {
 			setUserPokemons(caughtPokemons);
 		} else {
 			alert("No caught pokemons found. Please catch some pokemons first.");
