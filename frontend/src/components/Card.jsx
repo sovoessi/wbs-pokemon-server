@@ -24,7 +24,6 @@ function Card() {
   }, [APIURL]);
 
  const handleCatch = (pokemon) => {
-    // Get the current caughtPokemons from localStorage
     if(!caughtPokemons) {
       // If caughtPokemons is null or empty, initialize it with the current pokemon
       localStorage.setItem("caughtPokemons", JSON.stringify([pokemon]));
