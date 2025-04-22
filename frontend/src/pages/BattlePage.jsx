@@ -1,80 +1,91 @@
 import { useEffect, useState } from "react";
 import { getRandomPokemons, userWins } from "../utils/gameplay";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Updated import
+import { useNavigate } from "react-router-dom";
 
 const BattlePage = () => {
-	const [userPokemons, setUserPokemons] = useState([localStorage.getItem("caughtPokemons") || []]);
-	const [opponentPokemons, setOpponentPokemons] = useState([
-		getRandomPokemons(),
-	]);
+	const [userPokemons, setUserPokemons] = useState([]);
+	const [opponentPokemons, setOpponentPokemons] = useState([]);
 	const [userScore, setUserScore] = useState(0);
 	const [opponentScore, setOpponentScore] = useState(0);
 
-	const navigate = useNavigate(); // Initialize navigate
+	const navigate = useNavigate();
 
+	// Fetch user's caught Pokémon from localStorage
 	const fetchUserPokemons = () => {
-		const caughtPokemons = JSON.parse(localStorage.getItem("caughtPokemons") || "[]");
-		if (caughtPokemons && caughtPokemons.length > 0) {
+		const caughtPokemons = JSON.parse(
+			localStorage.getItem("caughtPokemons") || "[]"
+		);
+		if (caughtPokemons.length > 0) {
 			setUserPokemons(caughtPokemons);
 		} else {
-			alert("No caught pokemons found. Please catch some pokemons first.");
-			navigate("/card"); // Redirect to the card page if no caught pokemons
+			alert("No caught Pokémon found. Please catch some Pokémon first.");
+			navigate("/card"); // Redirect to the card page if no Pokémon are caught
 		}
-	}
+	};
 
-	useEffect (() => {
-		fetchUserPokemons();
-		fetchOpponentPokemons();
-	}, [navigate]);
-
+	// Fetch random opponent Pokémon
 	const fetchOpponentPokemons = async () => {
 		const pokemons = await getRandomPokemons();
 		setOpponentPokemons(pokemons);
 	};
 
+	// Initialize user and opponent Pokémon on component mount
+	useEffect(() => {
+		fetchUserPokemons();
+		fetchOpponentPokemons();
+	}, []);
+
+	// Handle the battle logic
 	const fightMode = () => {
-		// for each pokemon in userPokemons
-		// compare with each pokemon in opponentPokemons
-		// if user pokemon wins, increment userScore
-		// if opponent pokemon wins, increment opponentScore
-		// if equal, do nothing
+		if (userPokemons.length === 0 || opponentPokemons.length === 0) {
+			alert("Both players need Pokémon to battle!");
+			return;
+		}
+
 		userPokemons.forEach((userPokemon, index) => {
 			const opponentPokemon = opponentPokemons[index];
-			if (userWins(userPokemon, opponentPokemon)) {
-				setUserScore((prevScore) => prevScore + 1);
-			} else {
-				setOpponentScore((prevScore) => prevScore + 1);
+			if (opponentPokemon) {
+				if (userWins(userPokemon, opponentPokemon)) {
+					setUserScore((prevScore) => prevScore + 1);
+				} else {
+					setOpponentScore((prevScore) => prevScore + 1);
+				}
 			}
 		});
-		// reset userPokemons and opponentPokemons
+
+		// Reset Pokémon for the next battle
 		fetchOpponentPokemons();
-		fetchUserPokemons();
 	};
 
+	// Save the user's score to the leaderboard
 	const saveScore = async () => {
-		// take user id from token
 		const token = localStorage.getItem("token");
-		const userId = token.split(".")[1];
-		const decodedToken = JSON.parse(atob(userId));
-		const userIdFromToken = decodedToken.id;
-		// save score to database
+		if (!token) {
+			alert("You must be logged in to save your score.");
+			navigate("/login");
+			return;
+		}
+
 		try {
+			const userId = JSON.parse(atob(token.split(".")[1])).id; // Decode user ID from token
 			await axios.post(`${import.meta.env.VITE_API_URL}api/leaderboard`, {
-				userId: userIdFromToken,
+				userId,
 				score: userScore,
 			});
+			alert("Score saved successfully!");
 			navigate("/");
 		} catch (error) {
 			console.error("Error saving score:", error);
+			alert("Failed to save score. Please try again.");
 		}
-		// reset scores
+
+		// Reset scores and fetch new Pokémon
 		setUserScore(0);
 		setOpponentScore(0);
-		fetchOpponentPokemons();
 		fetchUserPokemons();
+		fetchOpponentPokemons();
 	};
-
 
 	return (
 		<>
@@ -82,7 +93,7 @@ const BattlePage = () => {
 			<div className='grid grid-cols-3 gap-4 m-4'>
 				{/* User Pokémons */}
 				<div className='bg-white p-4 rounded-lg shadow-md'>
-					<h2 className='text-xl font-bold mb-4 text-center'>My Pokémons</h2>
+					<h2 className='text-xl font-bold mb-4 text-center'>My Pokémon</h2>
 					{userPokemons.map((pokemon, index) => (
 						<div
 							key={index}
@@ -119,20 +130,20 @@ const BattlePage = () => {
 					>
 						Fight
 					</button>
-					{userScore ? (
+					{userScore > 0 && (
 						<button
 							onClick={saveScore}
 							className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded'
 						>
 							Save Score
 						</button>
-					) : null}
+					)}
 				</div>
 
 				{/* Opponent Pokémons */}
 				<div className='bg-white p-4 rounded-lg shadow-md'>
 					<h2 className='text-xl font-bold mb-4 text-center'>
-						Opponent Pokemons
+						Opponent Pokémon
 					</h2>
 					{opponentPokemons.map((pokemon, index) => (
 						<div

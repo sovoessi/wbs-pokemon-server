@@ -1,36 +1,38 @@
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
 function Home() {
+	const [results, setResults] = useState([]);
+	const [loading, setLoading] = useState(true);
 
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const response = await axios.get(`${APIURL}api/leaderboard`);
+				setResults(response.data);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchData();
+	}, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try{
-        const response = await axios.get(`${APIURL}api/leaderboard`);
-        setResults(response.data);
-        setLoading(false);
-        }catch (error) {
-          console.error("Error fetching data:", error);
-          setLoading(false);
-        }
-      }
-    fetchData();
-  }, []);
-  
-
-  return (
+	return (
 		<>
 			<h1 className='text-3xl font-bold underline text-center mb-6'>
 				Top Scores
 			</h1>
 			{loading ? (
 				<p className='text-center text-gray-500'>Loading...</p>
+			) : results.length === 0 ? (
+				<p className='text-center text-gray-500'>
+					No scores available yet. Be the first to play!
+				</p>
 			) : (
 				<div className='overflow-x-auto'>
 					<table className='table-auto w-full border-collapse border border-gray-300 shadow-lg'>
@@ -60,9 +62,7 @@ function Home() {
 										{index + 1}
 									</td>
 									<td className='border border-gray-300 px-4 py-2'>
-										{result.createdAt
-                      .slice(0, 10)
-                      .replace(/-/g, "/")}
+										{result?.updatedAt.slice(0, 10).replace(/-/g, "/")}
 									</td>
 									<td className='border border-gray-300 px-4 py-2'>
 										{result.userId.username}
