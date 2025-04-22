@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const NUMBER_OF_POKEMONS = 4
+const NUMBER_OF_POKEMONS = 10
 
 const getPokemonsArray = async () => {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}pokemons/`)
